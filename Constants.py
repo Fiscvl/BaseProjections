@@ -18,6 +18,7 @@ kStd_num_columns = 14
 kDR = "DR"
 kCR = "CR"
 kJELines = 2
+kMonthsInYear = 12
 
 kCategory = "Category"
 
@@ -75,6 +76,8 @@ kInCapSWAmortTermIndex = 17
 kInNewClientDaysIndex = 18
 kInClientCollectionDays = 19
 kInNewContractLength = 20
+kBaseCommissionRate = 21
+kMonthsLookbackChurn = 22
 
 #Accounts tab
 kInternalAccount = "Internal Only-"
@@ -118,8 +121,9 @@ kAccountSheetIndex = 4
 
 #RevExp tab
 kRevExpTypes = "RevExpTypes"
-#RevExp fieled
+#RevExp fields
 kRevExpType = "Class"
+kRevExpLog = "Log"
 
 #Commissions tab
 kCommissionsTab = "RevCommissions"
@@ -263,31 +267,43 @@ kCommCollection = "Collection"
 kCommInvoice = "Invoice"
 
 #Comp filename and tab names
-kCompFile = "Comp.xlsx"
-kCompPeople = 'Employees'
-#Employee/Contractor table - column number
-kEmplNumIndex= 0
-kEmplDeptIndex= 1
-kEmplNameIndex= 2
-kEmplTitleIndex = 3
-kEmplBeginIndex = 4
-kEmplEndIndex = 5
-kEmplMonthlyIndex = 6
-kEmplYearlyIndex = 7
-kEmplSalariedIndex = 8
-kEmplBonusIndex = 9
-kEmplBonusIndex = 10
-kEmplBenefitsIndex = 11
-kEmplCapSWIndex = 12
-kEmplCapSWaccIndex = 13
+kEmplFile = "Employees.xlsx"
+kEmplPeople = 'Employees'
+kEmplTypes = 'EmployeeTypes'
+kEmplAccounts = 'EmployeeAccounts'
 
-kCompComp = 'Comp'
-#Comp types used - column numbers	
-kCompTypeTypeIndex = 0
+kContFile = "Contractors.xlsx"
+kContPeople = 'Contractors'
+kContTypes = 'ContractorsTypes'
+kContAccounts = 'ContractorsAccounts'
+
+#Contractors file has same exact structure as the Employees file
+#Just the Individual info tabs are different\
+#The 2nd & 3rd tabs for compnensation use the same constants structure and names
+
+#Employee/Contractor table - column number
+kCompNumIndex= 0
+kCompDeptIndex= 1
+kCompNameIndex= 2
+kCompTitleIndex = 3
+kCompBeginIndex = 4
+kCompEndIndex = 5
+kCompMonthlyIndex = 6
+kCompYearlyIndex = 7
+kCompSalariedIndex = 8
+kCompBonusIndex = 9
+kCompBonusIndex = 10
+kCompBenefitsIndex = 11
+kCompCapSWIndex = 12
+kCompCapSWaccIndex = 13
+
+#Types field list, these are the list of rountines used to calculate total compensation
+#Comp types used - column numbers
+kCompTypeIndex = 0
 kCompTypeRowIndex = 1
 kCompTypeCRColumnIndex = 2
 
-kCompCompAc = 'CompAccounts'
+#Accounts used for all the various type of expenses
 #Comp expense accounts - column numbers											
 kCompAccDeptIndex = 0
 kCompAccCompIndex = 1
@@ -303,14 +319,8 @@ kCompAccEmplSetupIndex = 10
 kCompAccCapSWIndex = 11
 kCompAccCapSWAmortIndex = 12
 
-#Contractors flie has same exact structure as the Employees file
-kContFile = "Contractors.xlsx"
-kCompCont = 'Contractors'
-kCompContAc = 'ContractorsComp'
-kCompCompAccounts = 'ContractorsAccounts'
-
-kCompCapAcFile = 'CapSwAccounts.xlsx'
-kCompCapAc = "CapSwAccounts"
+kCapAcFile = 'CapSwAccounts.xlsx'
+kCapAc = "CapSwAccounts"
 # Capitalized SW & Fixed Asset fields
 kCapType = "Type"
 kCapTypeIndex = 0
@@ -334,7 +344,8 @@ kCapSWCompEmployees = "Employers"
 kCapSWCompContractors = "Contractors"
 kCapSWCompString = "_SW"
 kCapSWTotals = "Totals"
-kCapExSW = "CapSwAccounts"
+kCapExSW = "CapSwAccounts.xlsx"
+kCapSwAccounts = "CapSwAccounts"
 
 #churn invoice list fields
 kChurnClientIDindex = 0
@@ -431,18 +442,20 @@ kNewColumns = 13 # number of fields above
 #CapExSW table
 kCapExType = "Type"
 kCapExTypeIndex = 0
+kCapExCompType = "CompType"
+kCapExCompTypeIndex = 1
 kCapExSubType = "SubType"
-kCapExSubTypeIndex = 1
+kCapExSubTypeIndex = 2
 kCapExDebit = "Debit"
-kCapExDebitIndex = 2
+kCapExDebitIndex = 3
 kCapExCredit = "Credit"
-kCapExCreditIndex = 3
+kCapExCreditIndex = 4
 kCapExAccumulated= "Accumulated"
-kCapExAccumulatedIndex = 4
+kCapExAccumulatedIndex = 5
 kCapExInitial = "Initial term"
-kCapExInitialIndex = 5
+kCapExInitialIndex = 6
 kCapExTerm = "Term"
-kCapExTermIndex = 6
+kCapExTermIndex = 7
 
 kChurnOutClientID = "Client ID"
 kChurnOutProduct = "Product"
@@ -460,3 +473,12 @@ kChurnOutProductChurn = "Mid Invoice Churn"
 kChurnOutInvoiceCount = "Invoice Count"
 kChurnOutOverallChurn = "Overall Churn"
 kChurnOutChurnPercent = "Churn Percent"
+
+#Transaction Log
+kTransFile = "Transaction Log.xlsx"
+#Tabs are the class + sub class ("Empl/Cont", if it needs/exists)
+kTransMonth = "Month"
+kTransDrAcct = "DR Acct"
+kTransCRAcct = "CR Acct"
+kTransAmount ="Amount"
+

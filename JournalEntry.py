@@ -1,6 +1,6 @@
-import pandas as pd # to replace csv
+import pandas as pd
 import openpyxl
-from Constants import *
+from BaseProjections.Constants import *
 
 from datetime import *
 from dateutil.relativedelta import *
@@ -8,6 +8,8 @@ from dateutil.relativedelta import *
 # kTBaccountIndex = 0
 # kTBcreditIndex = 1
 # kTBCreditIndex = 2
+
+
 
 class CJE():
 

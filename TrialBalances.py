@@ -4,25 +4,29 @@ import copy
 
 from datetime import *
 from dateutil.relativedelta import *
-from Constants import *
-from Formats import *
+from BaseProjections.Constants import *
+from BaseProjections.Formats import *
 
 from copy import deepcopy
 
 class CTrialBalances():
 
-    def __init__(self, actuals_term, model_term, start_date, accounts, accountIndexs, equity_account ,rev_expense_classes, rev_expense_acs, inputs):
+    def __init__(self, actuals_term, model_term, start_date, accounts, accountIndexs, equity_account ,rev_expense_classes, rev_expense_acs, inputs, RevExpenseLogs):
 
         TBDict = {}
         self.TBDictOut = {}
+        self.transaction_logs = {}
         month_counter = 1
         TB_index = 0
+        ### check on this, it was corrupted
         current_date = start_date
         a_month = relativedelta(months=1)
         stop_TB = False
 
         # need to try except for errors
         excel_book = (inputs.full_path_input + kTB_file)
+
+        sheet_header = [kTransMonth, kTransDrAcct, kTransCRAcct, kTransAmount]
 
         try:
             xls = pd.ExcelFile(excel_book)
@@ -43,38 +47,64 @@ class CTrialBalances():
                 current_TB = temp_TB.copy()
                 TB_index += 1
                 TBDict[current_month] = current_TB
-    
+                transaction_log = []
             else:           
                 # Add to existing TB, for each revenue expense type
                 # and if the new TB is Jan of any year, strip off the IS and add the IS total to Retained Earnings
                 temp_TB = self.getNewTB(current_date, accounts, accountIndexs, equity_account, TBDict)
                 current_TB = copy.deepcopy(temp_TB)
+
+
                 for rev_expense_class in rev_expense_classes:                   
 
-                    if rev_expense_class == "CExpenses":
+                    if rev_expense_class == kClassExp:
                         current_TB = rev_expense_classes[rev_expense_class].CExpensesAddMonthsTransactions(month_counter-1, current_TB)
-                    elif rev_expense_class == "CRevenues":
-                        current_TB = rev_expense_classes[rev_expense_class].CRevenuesAddMonthsTransactions(month_counter-1, current_TB, inputs)
-                    elif rev_expense_class == "CCapExSW":
+                    elif rev_expense_class == kClassRev:
+                        current_TB = rev_expense_classes[rev_expense_class].CRevenuesAddMonthsTransactions(month_counter-1, current_TB, inputs)   
+                    elif rev_expense_class == kClassEmpl:
+                        CapSW_type = "none"
+                        current_TB = rev_expense_classes[rev_expense_class].CCompensationAddMonthsTransactions(month_counter-1, current_TB, CapSW_type, kEmplPeople)
+                    elif rev_expense_class == kClassCont:
+                        CapSW_type = "none"
+                        current_TB = rev_expense_classes[rev_expense_class].CCompensationAddMonthsTransactions(month_counter-1, current_TB, CapSW_type, kContPeople)
+                    elif rev_expense_class == kClassCapEx:
                         current_TB = rev_expense_classes[rev_expense_class].CCapExSWAddMonthsTransactions(month_counter-1, current_TB, inputs)
-                    elif rev_expense_class == "CEmployees":
-                        CapSW_type = "none"
-                        current_TB = rev_expense_classes[rev_expense_class].CCompensationAddMonthsTransactions(month_counter-1, current_TB, CapSW_type)
-                    elif rev_expense_class == "CContractors":
-                        CapSW_type = "none"
-                        current_TB = rev_expense_classes[rev_expense_class].CCompensationAddMonthsTransactions(month_counter-1, current_TB, CapSW_type)
-                    elif rev_expense_class == "CTBEntry":
+                    elif rev_expense_class == kClassTB:
                         current_TB = rev_expense_classes[rev_expense_class].CTBEntryAddMonthsTransactions(month_counter-1, current_TB)
+
+                    #add any modules that touch a TB here - order is independent for each module
+
                     else:
                         print("The Revenue/Expense Class is undefined: {rev_expense_class}")
 
                 TBDict[current_month] = current_TB
+
+                #future - check DR/CR equal, to the penny
                        
             current_date = current_date + a_month
             month_counter += 1
         
+
+
         self.writeTBs(start_date, TBDict, inputs)
         self.TBDictOut = TBDict
+
+        # get logs from class instances
+        print(RevExpenseLogs)
+        for rev_expense_class in RevExpenseLogs:
+            print("Rev exp class: ",rev_expense_class)
+            RevExpenseLogs[rev_expense_class] = rev_expense_classes[rev_expense_class].transaction_log
+
+        # print them out 
+        log_file = inputs.full_path_output + kTransFile
+        df_writer = pd.ExcelWriter(log_file, engine='xlsxwriter')
+        for rev_expense_class in RevExpenseLogs:
+            #print(rev_expense_class)
+            df = pd.DataFrame(RevExpenseLogs[rev_expense_class], columns = sheet_header)
+            #print(df)
+            df.to_excel(df_writer, sheet_name = rev_expense_class, index = False)
+
+        df_writer.close()
 
 
     def writeTBs(self, start_date, TBDict, inputs):

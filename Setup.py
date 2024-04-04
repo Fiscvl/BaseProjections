@@ -1,13 +1,10 @@
 from datetime import *
 from dateutil.relativedelta import *
-from Dates import *
-from Constants import *
+from BaseProjections.Dates import *
+from BaseProjections.Constants import *
 
 import pandas as pd
 import os
-
-
-
 
 # 0: Account
 # 1: Account Number
@@ -18,7 +15,7 @@ import os
 
 class CSetup():
     
-    def __init__(self):
+    def __init__(self, absolute_path):
 
         self.depts = []
         self.accounts = []
@@ -28,8 +25,6 @@ class CSetup():
         self.months_header = []
         internal_accounts = []
 
-        
-        absolute_path = os.path.dirname(__file__)
         input_relative_path = kInputPath
         output_relative_path = kOutputPath
         #path to b
@@ -46,6 +41,8 @@ class CSetup():
             products_df = pd.read_excel(excel_book, kProducts)
             self.rev_exp_accounts_df = pd.read_excel(excel_book, kRevExpAccounts)
             self.rev_exp_types_df = pd.read_excel(excel_book, kRevExpTypes)
+            self.CapExAcs_df = pd.read_excel(excel_book, kCapSwAccounts)
+            #print(self.rev_exp_types_df)
 
             # The green is hardcoded column names - need to be converted to Constants
 
@@ -111,6 +108,7 @@ class CSetup():
             self.products_list = products_df.values.tolist()
             self.SetupDict[kProducts] = self.products_list
 
+            #print(inputs_df.values)
             inputs_row = inputs_df.values.tolist()
             self.SetupDict[kInputs] = inputs_row
 
@@ -124,6 +122,8 @@ class CSetup():
         self.end_date = inputs_row[kFirst][kInEndDateIndex]
        
         self.projections_date = inputs_row[kFirst][kInActualsDateIndex]
+
+        #print("Date types: ", type(self.start_date), type(self.end_date), type(self.projections_date))
 
         self.dates = CMonths(self.start_date, self.end_date, self.projections_date)
 
@@ -152,6 +152,7 @@ class CSetup():
         self.amort_comp_term = (inputs_row[kFirst][kInCapSWAmortTermIndex])
         self.new_client_days = (inputs_row[kFirst][kInNewClientDaysIndex])
         self.new_client_term = (inputs_row[kFirst][kInNewContractLength])
+        self.ChurnMonthsLookback = (inputs_row[kFirst][kMonthsLookbackChurn])
 
         column_date = pd.to_datetime(self.start_date)
         
@@ -195,10 +196,12 @@ class CSetup():
 
         return Category_name
 
-       
-    #def input__init__(self):
-        
-
     def get_dates(self):
         return self.dates
+
+    def get_date(self, month_number):
+
+        month_date = self.start_date + relativedelta(months=month_number)
+
+        return month_date
 
